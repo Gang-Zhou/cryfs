@@ -12,11 +12,11 @@ function(target_activate_cpp14 TARGET)
     else("${CMAKE_VERSION}" VERSION_GREATER "3.1")
         check_cxx_compiler_flag("-std=c++14" COMPILER_HAS_CPP14_SUPPORT)
         if (COMPILER_HAS_CPP14_SUPPORT)
-            target_compile_options(${TARGET} PUBLIC -std=c++14)
+            target_compile_options(${TARGET} PRIVATE -std=c++14)
         else(COMPILER_HAS_CPP14_SUPPORT)
             check_cxx_compiler_flag("-std=c++1y" COMPILER_HAS_CPP14_PARTIAL_SUPPORT)
             if (COMPILER_HAS_CPP14_PARTIAL_SUPPORT)
-                target_compile_options(${TARGET} PUBLIC -std=c++1y)
+                target_compile_options(${TARGET} PRIVATE -std=c++1y)
             else()
                 message(FATAL_ERROR "Compiler doesn't support C++14")
             endif()
@@ -50,6 +50,21 @@ if (USE_CLANG_TIDY)
     endif()
 endif()
 
+# Find iwyu (for use in target_enable_style_warnings)
+if (USE_IWYU)
+    find_program(
+      IWYU_EXE NAMES
+      include-what-you-use
+      iwyu
+    )
+    if(NOT IWYU_EXE)
+        message(FATAL_ERROR "include-what-you-use not found. Please install iwyu or run without -DUSE_IWYU=on.")
+    else()
+        message(STATUS "iwyu found: ${IWYU_EXE}")
+        set(DO_IWYU "${IWYU_EXE}")
+    endif()
+endif()
+
 #################################################
 # Enable style compiler warnings
 #
@@ -61,7 +76,7 @@ function(target_enable_style_warnings TARGET)
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
         target_compile_options(${TARGET} PRIVATE -Wall -Wextra -Wold-style-cast -Wcast-align -Wno-unused-command-line-argument) # TODO consider -Wpedantic -Wchkp -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wundef -Wno-unused -Wno-variadic-macros -Wno-parentheses -fdiagnostics-show-option -Wconversion and others?
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-        target_compile_options(${TARGET} PRIVATE -Wall -Wextra -Wold-style-cast -Wcast-align) # TODO consider -Wpedantic -Wchkp -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wundef -Wno-unused -Wno-variadic-macros -Wno-parentheses -fdiagnostics-show-option -Wconversion and others?
+        target_compile_options(${TARGET} PRIVATE -Wall -Wextra -Wold-style-cast -Wcast-align -Wno-maybe-uninitialized) # TODO consider -Wpedantic -Wchkp -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wundef -Wno-unused -Wno-variadic-macros -Wno-parentheses -fdiagnostics-show-option -Wconversion and others?
     endif()
 
     if (USE_WERROR)
@@ -73,6 +88,12 @@ function(target_enable_style_warnings TARGET)
         set_target_properties(
           ${TARGET} PROPERTIES
           CXX_CLANG_TIDY "${CLANG_TIDY_CLI}"
+        )
+    endif()
+    if(USE_IWYU)
+        set_target_properties(
+          ${TARGET} PROPERTIES
+          CXX_INCLUDE_WHAT_YOU_USE "${DO_IWYU}"
         )
     endif()
 endfunction(target_enable_style_warnings)

@@ -2,9 +2,8 @@
 
 # Note: Call this from a cmake build directory (e.g. cmake/) for out-of-source builds
 # Examples:
-# mkdir cmake && cd cmake && ../run-clang-tidy.sh
-# mkdir cmake && cd cmake && ../run-clang-tidy.sh -fix
-# mkdir cmake && cd cmake && ../run-clang-tidy.sh -export-fixes fixes.yaml
+# mkdir cmake && cd cmake && ../run-iwqu.sh
+# mkdir cmake && cd cmake && ../run-iwqu.sh -fix
 
 set -e
 
@@ -19,4 +18,16 @@ cat compile_commands.json|jq "map(select(.file | test(\"^$(realpath ${0%/*})/(sr
 rm compile_commands.json
 mv compile_commands2.json compile_commands.json
 
-run-clang-tidy.py -j${NUMCORES} -quiet -header-filter "$(realpath ${0%/*})/(src|test)/.*" $@
+if [ "$1" = "-fix" ]; then
+  TMPFILE=/tmp/iwyu.`cat /dev/urandom | tr -cd 'a-f0-9' | head -c 8`.out
+
+  function cleanup {
+    rm ${TMPFILE}
+  }
+  trap cleanup EXIT
+
+  iwyu_tool -j${NUMCORES} -p. ${@:2} | tee ${TMPFILE}
+  fix_include < ${TMPFILE}
+else
+  iwyu_tool -j${NUMCORES} -p. $@
+fi
