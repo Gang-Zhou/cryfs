@@ -52,6 +52,9 @@ build_script:
   - cmd: dir "C:/Program Files/Dokan/DokanLibrary-1.1.0/driver"
   - cmd: dir "C:/Program Files/Dokan/DokanLibrary-1.1.0/include"
   - cmd: dir "C:/Program Files/Dokan/DokanLibrary-1.1.0/sample"
+  - cmd: dir "C:/Windows"
+  - cmd: dir "C:/Windows/System32"
+  - cmd: dir "C:/Windows/SysWow64"
   - cmd: cpack --verbose -G WIX
 
 on_failure:
