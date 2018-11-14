@@ -46,11 +46,7 @@ build_script:
   - cmd: .\test\blobstore\%CONFIGURATION%\blobstore-test.exe
   - cmd: .\test\cryfs\%CONFIGURATION%\cryfs-test.exe
   #- cmd: .\test\cryfs-cli\%CONFIGURATION%\cryfs-cli-test.exe
-  - cmd: dir "C:/"
-  - cmd: dir "C:/Program Files"
-  - cmd: dir "C:/Program Files/Dokan"
   - cmd: dir "C:/Program Files/Dokan/DokanLibrary-1.1.0/"
-  - cmd: dir C:\Program Files\Dokan\DokanLibrary-1.1.0
   - cmd: cpack --verbose -G WIX
 
 on_failure:
