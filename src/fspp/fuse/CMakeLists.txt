@@ -31,7 +31,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   #target_link_libraries(${PROJECT_NAME} PUBLIC "${DOKAN_LIB_PATH}/lib/dokannp1.lib")
   target_link_libraries(${PROJECT_NAME} PUBLIC "${DOKAN_LIB_PATH}/lib/dokanfuse1.lib")
 
-  install(FILES "${DOKAN_LIB_PATH}/lib/dokan1.dll" "${DOKAN_LIB_PATH}/lib/dokanfuse1.dll"
+  install(FILES "${DOKAN_LIB_PATH}/dokan1.dll" "${DOKAN_LIB_PATH}/dokanfuse1.dll"
     DESTINATION "${CMAKE_INSTALL_BINDIR}"
   )
 
